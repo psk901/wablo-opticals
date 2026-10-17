@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#101112" />
+  <meta name="description" content="Try Wablo Opticals frames live on your face. Browse frames and preview them using your phone camera." />
+  <title>Wablo Opticals — Virtual Try-On</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Wablo Opticals home"><span class="brand-mark">W</span><span>WABLO <small>OPTICALS</small></span></a>
+    <nav><button id="nav-shop" class="nav-link active">Frames</button><button id="nav-admin" class="nav-link">Store studio</button></nav>
+    <span class="pilot-pill"><i></i> SINGLE STORE PILOT</span>
+  </header>
+
+  <main>
+    <section id="shop-view" class="view">
+      <div class="hero">
+        <div class="hero-copy"><span class="eyebrow">YOUR FACE. YOUR FRAME.</span><h1>Find the frame<br/><em>that feels like you.</em></h1><p>Try our optical frames live with your phone camera. No app download needed.</p><button id="hero-start" class="btn btn-light">Explore frames <span>↗</span></button></div>
+        <div class="hero-art"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-glasses" aria-hidden="true"><svg viewBox="0 0 500 180"><path d="M22 35 Q85 12 175 38 L190 115 Q181 151 127 151 Q73 150 59 113 L45 57 Q35 42 22 35Z"/><path d="M478 35 Q415 12 325 38 L310 115 Q319 151 373 151 Q427 150 441 113 L455 57 Q465 42 478 35Z"/><path d="M190 64 Q250 34 310 64"/><path d="M20 34 L0 20 M480 34 L500 20"/></svg></div><div class="hero-caption">A better fit starts with a preview.</div></div>
+      </div>
+      <div class="section-heading"><div><span class="eyebrow">THE COLLECTION</span><h2>Frames to try</h2></div><span id="product-count" class="muted">Loading collection…</span></div>
+      <div id="product-grid" class="product-grid"><div class="empty-state">Loading frames…</div></div>
+      <div class="trust-strip"><span>◉ Live camera preview</span><span>◇ No app required</span><span>↗ Share with WhatsApp</span></div>
+    </section>
+
+    <section id="admin-view" class="view hidden">
+      <div class="studio-head"><div><span class="eyebrow">SINGLE-STORE CONTROL PANEL</span><h1>Store <em>studio.</em></h1><p>Upload a frame, prepare its overlay, and create a shareable try-on link. No database or Supabase account.</p></div><span class="studio-tag">WABLO OPTICALS</span></div>
+      <div id="setup-notice" class="notice"><strong>One-time image setup</strong><span>Use a free Cloudinary account with an unsigned upload preset. No Supabase, database, or secret API key is required. Follow README.md.</span></div>
+      <div id="cloud-config-panel" class="panel" style="margin-bottom:20px">
+        <div class="panel-title"><div><span class="eyebrow">ONE-TIME SETUP</span><h2>Connect image hosting</h2></div><span class="lock-icon">↗</span></div>
+        <p class="muted">Product photos are uploaded to Cloudinary. Product details are embedded in each share link, so the link works on any phone without a database.</p>
+        <form id="cloud-config-form" class="form-grid">
+          <label>Cloudinary cloud name<input id="cloud-name" required placeholder="your-cloud-name" autocomplete="off" /></label>
+          <label>Unsigned upload preset<input id="cloud-preset" required placeholder="wablo_opticals" autocomplete="off" /></label>
+          <div class="form-actions"><button class="btn btn-dark" type="submit">Save image settings</button><button id="export-catalog" class="btn btn-outline" type="button">Export catalogue</button><label class="btn btn-outline" style="display:inline-flex;align-items:center;justify-content:center">Import catalogue<input id="import-catalog" type="file" accept="application/json,.json" hidden /></label></div>
+          <p id="cloud-config-status" class="form-message" aria-live="polite"></p>
+        </form>
+      </div>
+      <div id="upload-panel" class="studio-layout">
+        <div class="panel upload-panel"><div class="panel-title"><div><span class="eyebrow">NEW FRAME</span><h2>Add a spectacle</h2></div><span class="step-number">01</span></div>
+          <form id="product-form" class="form-grid">
+            <label>Frame name<input id="frame-name" required maxlength="90" placeholder="e.g. Classic Black 01" /></label>
+            <div class="two-col"><label>Price (₹)<input id="frame-price" type="number" min="0" step="1" placeholder="1499" /></label><label>Frame colour<input id="frame-color" maxlength="40" placeholder="Gloss black" /></label></div>
+            <label>Frame photo (catalogue image)<input id="frame-photo" type="file" accept="image/*" required /></label>
+            <div class="upload-drop" id="drop-zone"><div class="upload-symbol">↑</div><strong>Choose a clear frame photo</strong><span>For best AR, use a front-facing PNG with a transparent background. Background removal is experimental.</span><img id="upload-preview" class="upload-preview hidden" alt="Selected spectacle preview" /></div>
+            <div class="prepare-row"><button id="prepare-btn" type="button" class="btn btn-outline" disabled>✦ Prepare frame overlay</button><span id="prepare-status" class="muted small">Upload a photo to begin.</span></div>
+            <div class="form-actions"><button id="save-product-btn" type="submit" class="btn btn-dark" disabled>Save frame & create link</button></div>
+            <p class="tiny muted">Images are hosted publicly so anyone with the link can view them. Do not upload private images. Complex spectacle arms may need a transparent PNG prepared separately.</p>
+          </form>
+        </div>
+        <div class="panel inventory-panel"><div class="panel-title"><div><span class="eyebrow">YOUR COLLECTION</span><h2>Live frame links</h2></div><span id="inventory-total" class="count-bubble">0</span></div><div id="admin-products" class="admin-products"><p class="muted">Sign in and load your collection.</p></div></div>
+      </div>
+    </section>
+
+    <section id="product-view" class="view hidden"><button id="back-to-shop" class="back-link">← All frames</button><div id="product-detail" class="product-detail"></div></section>
+
+    <section id="tryon-view" class="view hidden"><button id="back-to-product" class="back-link">← Back to frame</button><div class="tryon-heading"><span class="eyebrow">LIVE VIRTUAL TRY-ON</span><h1>See it on <em>you.</em></h1><p>Face the camera, move into the guide, and adjust the frame if needed.</p></div><div class="tryon-layout"><div class="camera-card"><div class="camera-stage" id="camera-stage"><video id="camera-video" autoplay playsinline muted></video><canvas id="tryon-canvas"></canvas><div id="camera-placeholder" class="camera-placeholder"><div class="camera-icon">◎</div><strong>Your camera preview appears here</strong><span>Use a well-lit space and look straight at the camera.</span></div><div id="face-status" class="face-status">Camera not started</div></div><div class="camera-controls"><button id="start-camera" class="btn btn-dark">Enable camera</button><button id="flip-camera" class="btn btn-outline" disabled>↻ Flip camera</button><button id="stop-camera" class="btn btn-outline" disabled>Stop</button></div><label class="fit-control">Frame size <input id="frame-scale" type="range" min="0.65" max="1.5" step="0.01" value="1" /><span id="scale-value">100%</span></label><p class="tiny muted">Camera processing runs in your browser. This demo does not record or upload camera video.</p></div><aside class="tryon-side"><div class="selected-frame" id="selected-frame"></div><div class="panel side-panel"><span class="eyebrow">HOW IT WORKS</span><ol class="steps"><li><b>01</b><span>Allow camera access when asked.</span></li><li><b>02</b><span>Look straight ahead in good lighting.</span></li><li><b>03</b><span>Move closer or adjust the frame size.</span></li></ol><button id="share-from-tryon" class="btn btn-whatsapp">Share this frame ↗</button></div></aside></div></section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="./"><span class="brand-mark">W</span><span>WABLO <small>OPTICALS</small></span></a><span>Virtual preview only. Actual fit and lens prescription may vary.</span><span>© <span id="year"></span> Wablo Opticals</span></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
