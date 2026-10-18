@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d2b3e">
+<title>Try it on | Wablo Opticals</title><meta property="og:title" content="Try it on live | Wablo Opticals"><meta property="og:description" content="Open the link and try this on with your phone camera"><meta property="og:image" content="https://psk901.github.io/wablo-opticals/og.png">
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'; form-action 'none'"><meta name="referrer" content="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d2b3e;--glass:#eef1f4;--amber:#f2a900}
+*{box-sizing:border-box;margin:0}html,body{height:100%}
+body{font-family:Manrope,system-ui,sans-serif;background:#000;color:#fff;overflow:hidden;position:relative}
+canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}video{display:none}
+.top{position:absolute;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top,0px)) 18px 40px;background:linear-gradient(#000a,#0000);display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.top span{color:var(--amber)}.top button{background:#ffffff26;backdrop-filter:blur(10px);color:#fff;padding:9px 14px;font-size:14px}
+.hint{position:absolute;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:#0009;backdrop-filter:blur(8px);padding:8px 14px;border-radius:99px;font-size:13px;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+.msg{position:absolute;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;text-align:center;padding:24px;background:#0d2b3ecc;font-size:15px}.msg:empty{display:none}
+.spin{width:34px;height:34px;border-radius:50%;border:4px solid #ffffff40;border-top-color:var(--amber);animation:r .8s linear infinite}@keyframes r{to{transform:rotate(360deg)}}
+.card{position:absolute;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:#0d2b3ed9;backdrop-filter:blur(16px);border:1px solid #ffffff22;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.info{display:flex;justify-content:space-between;align-items:baseline;gap:12px}.info h1{font-size:19px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.info p{font-size:22px;color:var(--amber);font-weight:800}
+.btns{display:flex;gap:8px}
+button{font:inherit;font-weight:700;border:0;border-radius:14px;padding:14px;cursor:pointer;flex:1;background:var(--glass);color:var(--ink)}button.main{background:var(--amber)}button.wa{background:#25d366;color:#063}
+:focus-visible{outline:3px solid #fff;outline-offset:2px}
+</style></head><body>
+<video id="v" playsinline muted></video><canvas id="c"></canvas>
+<div class="top"><div>wablo <span>opticals</span></div><button id="flip" aria-label="Switch camera">Flip camera</button></div>
+<div class="hint" id="hint"></div><div class="msg" id="msg"><div class="spin"></div>Starting camera…</div>
+<div class="card"><div class="info"><h1 id="n"></h1><p id="pr"></p></div><div class="btns"><button class="wa" id="wa" hidden>Order on WhatsApp</button><button class="main" id="snap">Save photo</button></div></div>
+<script type="module">
+import{startTryOn}from'./tryon.js';
+import CFG from'./config.js';
+const q=new URLSearchParams(location.search),$=i=>document.getElementById(i),id=q.get('i')||'';let T;
+const num=(v,d,lo,hi)=>{v=parseFloat(v);return Number.isFinite(v)?Math.min(hi,Math.max(lo,v)):d};
+const P={name:(q.get('n')||'Product').slice(0,80),price:num(q.get('p'),0,0,1e7),type:q.get('t')==='watch'?'watch':'specs',scale:num(q.get('s'),1,.3,2.5),ox:num(q.get('x'),0,-.6,.6),oy:num(q.get('y'),0,-.6,.6),
+image:`https://res.cloudinary.com/${CFG.cloud}/image/upload/f_png,w_900/${id}`};
+$('n').textContent=P.name;$('pr').textContent='₹'+P.price.toLocaleString('en-IN');
+$('hint').textContent=P.type==='watch'?'Show the back of your wrist, fingers pointing up':'Look straight at the camera';
+if(CFG.whatsapp&&/^\d{8,15}$/.test(CFG.whatsapp)){$('wa').hidden=false;$('wa').onclick=()=>open(`https://wa.me/${CFG.whatsapp}?text=`+encodeURIComponent(`Hi, I want to order: ${P.name} (₹${P.price})\n${location.href}`))}
+async function go(){$('msg').innerHTML='<div class="spin"></div>Starting camera…';
+if(!/^[\w\-\/.]+$/.test(id)){$('msg').textContent='This link is incomplete. Please ask for the link again.';return}
+try{T=await startTryOn({video:$('v'),canvas:$('c'),product:P,onStatus:s=>{if(s)$('msg').lastChild.textContent=s}});$('msg').innerHTML=''}
+catch(e){const b=document.createElement('button');b.className='main';b.textContent='Try again';b.style.flex='none';b.onclick=go;$('msg').textContent=e.name==='NotAllowedError'?'Camera is blocked. Allow camera access for this site in your browser, then try again.':'Could not start the try-on: '+e.message;$('msg').append(b)}}
+$('flip').onclick=()=>T&&T.flip();
+$('snap').onclick=async()=>{if(!T)return;const b=await T.snap(),f=new File([b],'tryon.jpg',{type:'image/jpeg'});
+if(navigator.canShare?.({files:[f]}))try{return await navigator.share({files:[f],text:`${P.name} - ${location.href}`})}catch{return}
+const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='tryon.jpg';a.click()};
+go();
+</script></body></html>
